@@ -148,6 +148,7 @@ last_sustain = 0
 pedal_deadzone = 10
 ledshow_timestamp = time.time()
 color_mode_name = ""
+next_step_activated = 0
 
 fastColorWipe(ledstrip.strip, True, ledsettings)
 
@@ -211,7 +212,7 @@ while True:
     manage_idle_animation(ledstrip, ledsettings, menu, midiports)
 
     # Check for activity
-    if (time.time() - midiports.last_activity) > 120:
+    if (time.time() - midiports.last_activity) > 120 and ledsettings.disable_backlight_on_idle == True:
         if backlight_cleared == False:
             ledsettings.backlight_stopped = True
             fastColorWipe(ledstrip.strip, True, ledsettings)
@@ -486,12 +487,16 @@ while True:
 
             if ledsettings.sequence_active and ledsettings.next_step is not None:
                 try:
-                    if "+" in ledsettings.next_step:
-                        if int(value) > int(ledsettings.next_step) and control == ledsettings.control_number:
+                    if "-" in ledsettings.next_step:
+                        if int(value) == 0 and int(control) == int(ledsettings.control_number):
                             ledsettings.set_sequence(0, 1)
-                    else:
-                        if int(value) < int(ledsettings.next_step) and control == ledsettings.control_number:
+                            next_step_activated = 1
+                    elif int(value) > int(ledsettings.next_step):
+                        if int(control) == int(ledsettings.control_number) and next_step_activated == 0:
                             ledsettings.set_sequence(0, 1)
+                            next_step_activated = 1
+                    elif next_step_activated == 1:
+                            next_step_activated = 0
                 except TypeError as e:
                     pass
                 except Exception as e:
