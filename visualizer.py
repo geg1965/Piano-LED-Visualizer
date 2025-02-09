@@ -3,6 +3,7 @@
 import webcolors as wc
 import sys
 import os
+import subprocess
 
 import fcntl
 
@@ -475,6 +476,12 @@ while True:
                                      wc.rgb_to_hex((red, green, blue)))
                 else:
                     saving.add_track("note_on", msg.note, velocity, msg_timestamp)
+
+        # Midi program change event
+        elif msg.type == "program_change":
+            program = msg.program
+            channel = find_between(str(msg), "channel=", " ")
+            subprocess.run(["/home/Piano-LED-Visualizer/prgchange", str(program), str(channel)])
 
         # Midi control change event
         elif msg.type == "control_change":
